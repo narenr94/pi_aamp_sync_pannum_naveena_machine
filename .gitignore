@@ -1,0 +1,24 @@
+# Temporary files created during sync process
+*.temp
+pi_sync.temp
+*.patch
+*_mid.patch
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Log files
+*.log
+
+# Any other temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+aamp/
+meta-rdk-video/
+middleware-player-interface/
