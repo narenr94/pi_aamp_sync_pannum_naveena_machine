@@ -1,204 +1,152 @@
-# AAMP Repository Synchronization Scripts
-
-A collection of shell scripts for synchronizing changes from the `dev_sprint_25_2` branch to the `feature/RDKEMW-13297` branch across multiple RDK Central repositories.
+# AAMP to Middleware Player Interface Sync Script
 
 ## Overview
 
-This project provides automated synchronization tools for managing code changes across three interconnected RDK repositories, with additional AAMP source configuration updates:
+This is a simplified sync script that synchronizes changes from the AAMP `dev_sprint_25_2` branch to the `middleware-player-interface` `feature/RDKEMW-13297` branch.
 
-- **aamp** - Advanced Adaptive Media Player repository
-- **middleware-player-interface** - Middleware components for player interface  
-- **meta-rdk-video** - RDK video meta layer with SRCREV management
-- **aamp source updates** - AAMP configuration synchronization
+## Process Flow
 
-The synchronization process ensures consistent updates across all repositories while maintaining proper dependency relationships and build configurations.
+The script follows these 27 steps:
 
-## Architecture
+### Repository Setup (Steps 1-6)
+1. Check if `middleware-player-interface` folder exists
+2. Clone `middleware-player-interface` repository if needed
+3. Switch to middleware-player-interface directory and checkout `feature/RDKEMW-13297`
+4. Pull latest changes from the feature branch
+5. Read last synced AAMP commit from `aamp_sync_cid.txt`
+6. Return to parent directory
 
-The sync process is divided into 48 sequential steps, organized across specialized scripts:
+### AAMP Repository Setup (Steps 7-14)
+7. Check if `aamp` folder exists
+8. Clone `aamp` repository if needed
+9. Switch to aamp directory and checkout `dev_sprint_25_2`
+10. Pull latest changes from dev_sprint_25_2
+11. Get latest AAMP commit ID
+12. Compare commits to determine if sync is needed
+13. Generate patch file between last synced and latest commits
+14. Return to parent directory
 
-```
-Main Orchestrator
-├── pi_aamp_sync_pannum_naveena_machine.sh (Steps 1-48)
-│
-├── AAMP Repository Sync
-│   └── aamp_sync.sh (Steps 1-12)
-│
-├── Middleware Player Interface Sync  
-│   └── pi_sync.sh (Steps 13-26)
-│
-├── Meta RDK Video Sync
-│   └── mrv_sync.sh (Steps 27-40)
-│
-├── AAMP Source Update Sync
-│   └── sim_source_update.sh (Steps 41-48)
-│
-└── Utilities
-    └── filter_middleware_patch.py
-```
+### Patch Processing (Steps 15-20)
+15. Filter patch for middleware components using `filter_middleware_patch.py`
+16. Analyze filtered patch to determine if middleware changes exist
+17. Remove original patch file
+18. Move filtered patch to middleware-player-interface directory
+19. Apply filtered patch (if middleware changes exist)
+20. Remove filtered patch file
 
-## Scripts Description
-
-### Main Orchestrator Script
-- **`pi_aamp_sync_pannum_naveena_machine.sh`**
-  - Primary entry point for the entire sync process
-  - Handles preprocessing, state management, and script orchestration
-  - Manages execution flow across all 48 steps
-  - Provides resumability from any step number
-
-### Repository-Specific Scripts
-
-#### AAMP Repository (Steps 1-12)
-- **`aamp_sync.sh`**
-  - Clones/checks aamp repository
-  - Merges `dev_sprint_25_2` into `feature/RDKEMW-13297`
-  - Generates patch files for middleware filtering
-  - Pushes changes and captures commit IDs
-
-#### Middleware Player Interface (Steps 13-26)
-- **`pi_sync.sh`**
-  - Filters patches for middleware components
-  - Applies filtered patches to middleware-player-interface repository
-  - Commits and pushes changes
-  - Captures final commit ID for SRCREV updates
-
-#### Meta RDK Video (Steps 27-40)
-- **`mrv_sync.sh`**
-  - Clones/sets up meta-rdk-video repository
-  - Updates SRCREV values for aamp and player-interface
-  - Commits and pushes SRCREV changes
-
-#### AAMP Source Update (Steps 41-48)
-- **`sim_source_update.sh`**
-  - Updates OPTION_MIDDLEWARE_PLAYER_INTERFACE_COMMIT_ID in aamp
-  - Synchronizes player-interface commit references in aamp build options
-  - Commits and pushes configuration changes
-
-### Utility Scripts
-- **`filter_middleware_patch.py`**
-  - Python script for filtering patch files
-  - Extracts middleware-related changes only
-  - Adjusts file paths for proper application
+### Commit and Sync (Steps 21-27)
+21. Update `aamp_sync_cid.txt` with latest AAMP commit
+22. Add all changes to git
+23. Commit changes with timestamp
+24. Push changes to `feature/RDKEMW-13297`
+25. Get final middleware commit ID
+26. Return to sync directory
+27. Generate final sync report
 
 ## Usage
 
 ### Basic Usage
 ```bash
-# Run complete sync process from step 1
-./pi_aamp_sync_pannum_naveena_machine.sh
-
-# Resume from a specific step (e.g., step 15)
-./pi_aamp_sync_pannum_naveena_machine.sh 15
+./aamp_middleware_sync.sh
 ```
 
-### Individual Script Usage
+### Resume from Specific Step
 ```bash
-# Run AAMP sync only (steps 1-12)
-./aamp_sync.sh <start_step> <state_file>
-
-# Run PI sync only (steps 13-26)  
-./pi_sync.sh <start_step> <state_file>
-
-# Run MRV sync only (steps 27-40)
-./mrv_sync.sh <start_step> <state_file>
-
-# Run AAMP source update only (steps 41-48)
-./sim_source_update.sh <start_step> <state_file>
+./aamp_middleware_sync.sh 15    # Resume from step 15
 ```
 
 ### Help
 ```bash
-./pi_aamp_sync_pannum_naveena_machine.sh --help
+./aamp_middleware_sync.sh --help
 ```
 
-## Features
+## Key Features
 
 ### State Management
-- Persistent state tracking across script executions
-- Resume capability from any failed step
-- State file management for process continuity
+- Automatically saves progress to `aamp_middleware_sync.temp`
+- Can resume from any step if script fails
+- State file is automatically cleaned up on successful completion
 
 ### Error Handling
-- Comprehensive error checking and reporting
-- Colored output for better visibility (Green/Yellow/Red)
-- Graceful failure handling with detailed error messages
+- Comprehensive error checking at each step
+- Clear error messages with step numbers
+- State preservation for debugging and resumption
 
-### Validation
-- Step number validation (1-48 range)
-- Repository state verification
-- Branch existence and accessibility checks
+### Smart Sync Detection
+- Only processes changes if new commits are available
+- Exits early if repositories are already synchronized
+- Tracks sync status via `aamp_sync_cid.txt`
 
-### Flexibility
-- Modular design allows running individual sync phases
-- Configurable starting points for troubleshooting
-- Support for different execution environments
+### Patch Filtering
+- Uses `filter_middleware_patch.py` to extract middleware-specific changes
+- Only applies patches if middleware changes are detected
+- Automatically handles empty patches
 
-## Step-by-Step Process
+## Files
 
-### Phase 1: AAMP Repository (Steps 1-12)
-1. Repository setup and validation
-2. Branch management and merging
-3. Conflict resolution (if needed)
-4. Patch generation for middleware components
-5. Change validation and testing
-6. Commit and push operations
+- `aamp_middleware_sync.sh` - Main sync script
+- `filter_middleware_patch.py` - Middleware patch filtering utility
+- `aamp_middleware_sync.temp` - State file (created/removed automatically)
 
-### Phase 2: Middleware Player Interface (Steps 13-26)
-7. Patch filtering for middleware components
-8. Repository preparation
-9. Patch application and validation
-10. Build verification
-11. Commit and push operations
-12. Commit ID extraction
+## Requirements
 
-### Phase 3: Meta RDK Video (Steps 27-40)
-13. Meta repository setup
-14. SRCREV value updates
-15. Build configuration validation
-16. Final commit and push operations
+- Git repositories must be accessible
+- Python 3 for patch filtering
+- Write access to both repositories
+- Network connectivity for git operations
 
-### Phase 4: AAMP Source Update (Steps 41-48)
-17. AAMP configuration repository access
-18. OPTION_MIDDLEWARE_PLAYER_INTERFACE_COMMIT_ID synchronization
-19. Build option validation and updates
-20. Configuration commit and push operations
+## Repository Structure
 
-## Prerequisites
+The script expects/creates this structure:
+```
+sync/new/
+├── aamp_middleware_sync.sh
+├── filter_middleware_patch.py
+├── aamp/                           (cloned automatically)
+└── middleware-player-interface/    (cloned automatically)
+    └── aamp_sync_cid.txt          (tracks last synced commit)
+```
 
-- Bash shell environment
-- Git access to RDK Central repositories
-- Python 3.x for patch filtering utility
-- Appropriate repository access permissions
-- Network connectivity to RDK Central
+## Example Output
+
+```
+[STEP 1] Check if middleware-player-interface folder exists
+[INFO] middleware-player-interface folder found
+[STEP 2] Clone middleware-player-interface repository if needed
+[INFO] middleware-player-interface repository already exists, skipping clone
+...
+[STEP 12] Compare last synced commit with latest commit
+[INFO] New changes detected - sync required
+[INFO] Last synced: 77af12f799162638fbf14e96f5396def105cb92d
+[INFO] Latest:      a1b2c3d4e5f6789012345678901234567890abcd
+...
+[STEP 16] Analyze filtered patch for middleware changes
+[INFO] Middleware changes found: 3 diff sections
+[INFO] Middleware patch application required: true
+...
+============================================
+SUCCESS: AAMP to Middleware sync completed!
+============================================
+```
 
 ## Error Recovery
 
-The scripts support resuming from any step in case of failures:
+If the script fails:
+1. Note the step number from the error message
+2. Fix the underlying issue (network, permissions, etc.)
+3. Resume using: `./aamp_middleware_sync.sh <step_number>`
 
-1. Check the last successful step from console output
-2. Fix any environmental or permission issues
-3. Resume using: `./pi_aamp_sync_pannum_naveena_machine.sh <step_number>`
+Example:
+```bash
+# If script failed at step 15
+./aamp_middleware_sync.sh 15
+```
 
-## State Files
+## Differences from Original Multi-Script Approach
 
-The synchronization process uses state files to track progress:
-- Enables resumability after interruptions
-- Stores commit IDs and repository states
-- Maintains process context across script executions
-
-## Logging and Output
-
-- Color-coded status messages (INFO, WARNING, ERROR)
-- Step-by-step progress tracking
-- Detailed error reporting with context
-- Final summary of sync results
-
-
-## Troubleshooting
-
-Common issues and solutions:
-- **Permission denied**: Ensure proper Git repository access
-- **Branch not found**: Verify branch names and repository state
-- **Patch application failed**: Check for conflicting changes
-- **State file issues**: Remove state file and restart if corrupted
-
+This simplified approach:
+- Combines all operations into a single script
+- Focuses only on AAMP → middleware-player-interface sync
+- Removes meta-rdk-video and complex multi-repository coordination
+- Provides the same error handling and state management
+- Uses the same patch filtering logic
