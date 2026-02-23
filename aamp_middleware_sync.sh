@@ -4,7 +4,7 @@
 # AAMP to Middleware Player Interface Sync Script
 # 
 # This script synchronizes changes from aamp dev_sprint_25_2 branch to 
-# middleware-player-interface feature/RDKEMW-13297 branch.
+# middleware-player-interface feature/dev_sprint_pli branch.
 #
 # Process:
 # 1. Check/clone middleware-player-interface repository
@@ -31,7 +31,7 @@ if [ $# -eq 1 ]; then
         echo "Usage: $0 [start_step]"
         echo ""
         echo "This script syncs dev_sprint_25_2 branch changes from aamp to"
-        echo "feature/RDKEMW-13297 branch in middleware-player-interface repository."
+        echo "feature/dev_sprint_pli branch in middleware-player-interface repository."
         echo ""
         echo "Arguments:"
         echo "  start_step    Optional. Step number to start from (1-27)."
@@ -236,24 +236,24 @@ fi
 # Step 3: Switch to middleware-player-interface directory and checkout feature branch
 current_step=3
 if should_execute_step $current_step; then
-    print_step $current_step "Switch to middleware-player-interface and checkout feature/RDKEMW-13297"
+    print_step $current_step "Switch to middleware-player-interface and checkout feature/dev_sprint_pli"
     if ! cd ./middleware-player-interface; then
         handle_error $current_step "Failed to enter middleware-player-interface directory"
     fi
     
-    if ! git checkout feature/RDKEMW-13297; then
-        handle_error $current_step "Failed to checkout feature/RDKEMW-13297 branch"
+    if ! git checkout feature/dev_sprint_pli; then
+        handle_error $current_step "Failed to checkout feature/dev_sprint_pli branch"
     fi
-    print_status "Successfully checked out feature/RDKEMW-13297 branch"
+    print_status "Successfully checked out feature/dev_sprint_pli branch"
     save_state
 else
-    skip_step $current_step "Switch to middleware-player-interface and checkout feature/RDKEMW-13297"
+    skip_step $current_step "Switch to middleware-player-interface and checkout feature/dev_sprint_pli"
 fi
 
 # Step 4: Pull latest changes
 current_step=4
 if should_execute_step $current_step; then
-    print_step $current_step "Pull latest changes from feature/RDKEMW-13297"
+    print_step $current_step "Pull latest changes from feature/dev_sprint_pli"
     # Ensure we're in the right directory
     if [ ! -f "aamp_sync_cid.txt" ] && [ ! -d "../middleware-player-interface" ]; then
         cd ./middleware-player-interface
@@ -265,7 +265,7 @@ if should_execute_step $current_step; then
     print_status "Successfully pulled latest changes"
     save_state
 else
-    skip_step $current_step "Pull latest changes from feature/RDKEMW-13297"
+    skip_step $current_step "Pull latest changes from feature/dev_sprint_pli"
 fi
 
 # Step 5: Read last synced aamp commit from aamp_sync_cid.txt
@@ -725,21 +725,21 @@ fi
 # Step 24: Push changes to feature branch
 current_step=24
 if should_execute_step $current_step; then
-    print_step $current_step "Push changes to feature/RDKEMW-13297"
+    print_step $current_step "Push changes to feature/dev_sprint_pli"
     
     # Ensure we're in middleware-player-interface directory
     if [ ! -f "aamp_sync_cid.txt" ] && [ -d "../middleware-player-interface" ]; then
         cd ./middleware-player-interface
     fi
     
-    if ! git push origin feature/RDKEMW-13297; then
-        handle_error $current_step "Failed to push changes to feature/RDKEMW-13297"
+    if ! git push origin feature/dev_sprint_pli; then
+        handle_error $current_step "Failed to push changes to feature/dev_sprint_pli"
     fi
     
-    print_status "Successfully pushed changes to feature/RDKEMW-13297"
+    print_status "Successfully pushed changes to feature/dev_sprint_pli"
     save_state
 else
-    skip_step $current_step "Push changes to feature/RDKEMW-13297"
+    skip_step $current_step "Push changes to feature/dev_sprint_pli"
 fi
 
 # Step 25: Get final middleware commit ID
@@ -812,7 +812,7 @@ if should_execute_step $current_step; then
             echo "- No middleware-specific changes found in patch - only tracking file updated"
         fi
         echo "- Updated aamp_sync_cid.txt to track latest sync: $latest_aamp_commit"
-        echo "- Committed and pushed changes to feature/RDKEMW-13297"
+        echo "- Committed and pushed changes to feature/dev_sprint_pli"
     fi
     
     echo ""
